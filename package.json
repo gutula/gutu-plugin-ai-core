@@ -1,0 +1,8 @@
+{
+  "name": "gutu-plugin-ai-core",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "framework/builtin-plugins/*"
+  ]
+}
