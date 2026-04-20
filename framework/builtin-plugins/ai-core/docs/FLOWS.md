@@ -2,7 +2,9 @@
 
 ## Happy paths
 
-_No workflows were discovered for this target._
+- `ai.agent-runs.submit`: Submit a governed AI run against approved tools and prompt versions.
+- `ai.approvals.approve`: Resolve an AI approval checkpoint with an explicit human decision.
+- `ai.prompts.publish`: Publish a reviewed prompt version for governed use.
 
 ## Action-level flows
 
@@ -15,16 +17,20 @@ Permission: `ai.runs.submit`
 Business purpose: Start durable agent work without bypassing tenant, tool, prompt, or replay governance.
 
 Preconditions:
-- The tenant, actor, and agent identifiers must be valid.
-- At least one allowed tool id must be provided.
+
+- Caller input must satisfy the action schema exported by the plugin.
+- The caller must satisfy the declared permission and any host-level installation constraints.
+- Integration should honor the action’s idempotent semantics.
 
 Side effects:
-- Creates a durable run record.
-- May create an approval checkpoint before completion.
+
+- Mutates or validates state owned by `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`.
 
 Forbidden shortcuts:
-- Do not invoke undeclared tools outside the allowed tool list.
-- Do not run with an unpublished or untracked prompt version.
+
+- Do not bypass the action contract with undocumented service mutations in application code.
+- Do not document extra hooks, retries, or lifecycle semantics unless they are explicitly exported here.
+
 
 ### `ai.approvals.approve`
 
@@ -35,14 +41,20 @@ Permission: `ai.approvals.approve`
 Business purpose: Allow sensitive AI steps to continue only after accountable human review.
 
 Preconditions:
-- The checkpoint must belong to the supplied run and tenant.
-- The acting user must hold ai.approvals.approve permission.
+
+- Caller input must satisfy the action schema exported by the plugin.
+- The caller must satisfy the declared permission and any host-level installation constraints.
+- Integration should honor the action’s idempotent semantics.
 
 Side effects:
-- Resumes or terminates the associated run based on the decision.
+
+- Mutates or validates state owned by `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`.
 
 Forbidden shortcuts:
-- Agents must not self-approve their own checkpoints.
+
+- Do not bypass the action contract with undocumented service mutations in application code.
+- Do not document extra hooks, retries, or lifecycle semantics unless they are explicitly exported here.
+
 
 ### `ai.prompts.publish`
 
@@ -53,16 +65,24 @@ Permission: `ai.prompts.publish`
 Business purpose: Move prompt changes into an auditable, replay-safe published state before agents depend on them.
 
 Preconditions:
-- The prompt body must pass validation and review before publication.
+
+- Caller input must satisfy the action schema exported by the plugin.
+- The caller must satisfy the declared permission and any host-level installation constraints.
+- Integration should honor the action’s non-idempotent semantics.
 
 Side effects:
-- Creates a published prompt version record.
+
+- Mutates or validates state owned by `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`.
 
 Forbidden shortcuts:
-- Do not overwrite an existing published prompt body in place.
+
+- Do not bypass the action contract with undocumented service mutations in application code.
+- Do not document extra hooks, retries, or lifecycle semantics unless they are explicitly exported here.
+
 
 ## Cross-package interactions
 
-- Describe upstream triggers, downstream side effects, notifications, and jobs.
-- Document when this target depends on auth, approvals, billing, or data freshness from another package.
-- Document how failures recover and who owns reconciliation.
+- Direct dependencies: `auth-core`, `org-tenant-core`, `role-policy-core`, `audit-core`, `jobs-core`, `workflow-core`, `notifications-core`
+- Requested capabilities: `ui.register.admin`, `api.rest.mount`, `data.write.ai`, `jobs.execute.ai`, `workflow.execute.ai`, `notifications.enqueue.ai`, `ai.model.invoke`, `ai.tool.execute`
+- Integration model: Actions+Resources+Jobs+UI
+- Recovery ownership should stay with the host orchestration layer when the plugin does not explicitly export jobs, workflows, or lifecycle events.
