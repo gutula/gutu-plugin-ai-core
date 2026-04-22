@@ -14,6 +14,8 @@ describe("ui surface registration", () => {
     expect(adminContributions.pages.map((page) => page.route)).toContain("/admin/ai/prompts");
     expect(adminContributions.pages.map((page) => page.route)).toContain("/admin/ai/approvals");
     expect(adminContributions.pages.map((page) => page.route)).toContain("/admin/ai/replay");
+    expect(adminContributions.pages.map((page) => page.route)).toContain("/admin/tools/workflow-builder");
+    expect(adminContributions.pages.map((page) => page.route)).toContain("/admin/tools/approval-builder");
     expect(adminContributions.widgets.map((widget) => widget.id)).toContain("ai.active-runs");
     expect(adminContributions.reports[0]?.route).toBe("/admin/reports/ai-run-usage");
   });

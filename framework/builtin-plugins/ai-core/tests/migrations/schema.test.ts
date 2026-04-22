@@ -1,0 +1,88 @@
+import { describe, expect, it } from "bun:test";
+import { getTableColumns } from "drizzle-orm";
+
+import { agentRuns, approvalRequests, promptVersions, runArtifacts, runEvidence, runEvents, runnerHandoffs, verifierResults } from "../../db/schema";
+
+describe("ai-core schema coverage", () => {
+  it("captures durable orchestration, approval, artifact, and evidence tables", () => {
+    expect(Object.keys(getTableColumns(agentRuns))).toEqual([
+      "id",
+      "tenantId",
+      "agentId",
+      "status",
+      "modelId",
+      "executionMode",
+      "processClass",
+      "riskTier",
+      "slaMinutes",
+      "stepCount",
+      "artifactCount",
+      "evidenceCount",
+      "replayFingerprint",
+      "escalationQueue",
+      "startedAt"
+    ]);
+    expect(Object.keys(getTableColumns(promptVersions))).toEqual([
+      "id",
+      "tenantId",
+      "templateId",
+      "version",
+      "status",
+      "publishedAt"
+    ]);
+    expect(Object.keys(getTableColumns(approvalRequests))).toEqual([
+      "id",
+      "tenantId",
+      "runId",
+      "toolId",
+      "state",
+      "requestedAt",
+      "expiresAt"
+    ]);
+    expect(Object.keys(getTableColumns(runArtifacts))).toEqual([
+      "id",
+      "tenantId",
+      "runId",
+      "kind",
+      "label",
+      "uri",
+      "createdAt"
+    ]);
+    expect(Object.keys(getTableColumns(runEvidence))).toEqual([
+      "id",
+      "tenantId",
+      "runId",
+      "kind",
+      "label",
+      "passed",
+      "createdAt"
+    ]);
+    expect(Object.keys(getTableColumns(runEvents))).toEqual([
+      "id",
+      "tenantId",
+      "runId",
+      "type",
+      "summary",
+      "createdAt"
+    ]);
+    expect(Object.keys(getTableColumns(runnerHandoffs))).toEqual([
+      "id",
+      "tenantId",
+      "runId",
+      "target",
+      "state",
+      "endpoint",
+      "requestedAt",
+      "completedAt"
+    ]);
+    expect(Object.keys(getTableColumns(verifierResults))).toEqual([
+      "id",
+      "tenantId",
+      "runId",
+      "hookId",
+      "outcome",
+      "summary",
+      "createdAt"
+    ]);
+  });
+});

@@ -1,8 +1,15 @@
 import { defineAction } from "@platform/schema";
 import { z } from "zod";
 import {
+  branchAgentRunControl,
+  cancelAgentRunControl,
+  completeRunnerHandoffControl,
+  escalateAgentRunControl,
   approveAgentCheckpointDecision,
+  prepareRunnerHandoffControl,
   publishPromptVersion,
+  recordVerifierResultControl,
+  resumeAgentRunControl,
   submitAgentRun
 } from "../services/main.service";
 
@@ -40,7 +47,11 @@ export const submitAgentRunAction = defineAction({
     promptVersionId: z.string().min(2),
     goal: z.string().min(12),
     allowedToolIds: z.array(z.string().min(2)).min(1),
-    modelId: z.string().min(2).optional()
+    modelId: z.string().min(2).optional(),
+    executionMode: z.enum(["deterministic", "bounded-agent", "human-task", "sandbox", "strict-process", "exploratory"]).optional(),
+    processClass: z.string().min(2).optional(),
+    riskTier: z.enum(["low", "moderate", "high", "critical"]).optional(),
+    slaMinutes: z.number().int().positive().optional()
   }),
   output: z.object({
     ok: z.literal(true),
@@ -92,7 +103,8 @@ export const approveAgentCheckpointAction = defineAction({
     runId: z.string().min(2),
     checkpointId: z.string().min(2),
     approved: z.boolean(),
-    note: z.string().min(3).optional()
+    note: z.string().min(3).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
   }),
   output: z.object({
     ok: z.literal(true),
@@ -116,6 +128,180 @@ export const approveAgentCheckpointAction = defineAction({
     }
   },
   handler: ({ input }) => approveAgentCheckpointDecision(input)
+});
+
+export const resumeAgentRunAction = defineAction({
+  id: "ai.agent-runs.resume",
+  description: "Resume a governed AI run after a manual hold or escalation review.",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    reason: z.string().min(3).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    status: z.enum(["completed", "running"])
+  }),
+  permission: "ai.runs.resume",
+  idempotent: true,
+  audit: true,
+  ai: {
+    purpose: "Resume a manually held governed AI run.",
+    riskLevel: "moderate",
+    approvalMode: "required",
+    resultSummaryHint: "Return the run id and resulting lifecycle status."
+  },
+  handler: ({ input }) => resumeAgentRunControl(input)
+});
+
+export const cancelAgentRunAction = defineAction({
+  id: "ai.agent-runs.cancel",
+  description: "Cancel a governed AI run and preserve the audit trail.",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    reason: z.string().min(3).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    status: z.literal("cancelled")
+  }),
+  permission: "ai.runs.cancel",
+  idempotent: true,
+  audit: true,
+  ai: {
+    purpose: "Cancel a governed AI run while preserving replay-safe evidence.",
+    riskLevel: "moderate",
+    approvalMode: "required",
+    resultSummaryHint: "Return the cancelled run id."
+  },
+  handler: ({ input }) => cancelAgentRunControl(input)
+});
+
+export const escalateAgentRunAction = defineAction({
+  id: "ai.agent-runs.escalate",
+  description: "Escalate a governed AI run into a higher-priority operator or approval queue.",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    reason: z.string().min(3).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    status: z.literal("escalated")
+  }),
+  permission: "ai.runs.escalate",
+  idempotent: true,
+  audit: true,
+  ai: {
+    purpose: "Escalate a governed AI run to a higher-priority queue.",
+    riskLevel: "high",
+    approvalMode: "required",
+    resultSummaryHint: "Return the escalated run id."
+  },
+  handler: ({ input }) => escalateAgentRunControl(input)
+});
+
+export const branchAgentRunAction = defineAction({
+  id: "ai.agent-runs.branch",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    branchKey: z.string().min(2),
+    branchReason: z.string().min(3),
+    branchRunId: z.string().min(2).optional(),
+    executionMode: z.enum(["deterministic", "bounded-agent", "human-task", "sandbox", "strict-process", "exploratory"]).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    status: z.literal("queued"),
+    parentRunId: z.string()
+  }),
+  permission: "ai.runs.branch",
+  idempotent: false,
+  audit: true,
+  handler: ({ input }) => branchAgentRunControl(input)
+});
+
+export const prepareRunnerHandoffAction = defineAction({
+  id: "ai.runs.handoffs.prepare",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    handoffId: z.string().min(2),
+    target: z.enum(["same-process", "queue-worker", "sandbox", "external-runner"]),
+    endpoint: z.string().min(2).optional(),
+    note: z.string().min(3).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    handoffId: z.string(),
+    state: z.literal("prepared")
+  }),
+  permission: "ai.runs.handoffs.prepare",
+  idempotent: true,
+  audit: true,
+  handler: ({ input }) => prepareRunnerHandoffControl(input)
+});
+
+export const completeRunnerHandoffAction = defineAction({
+  id: "ai.runs.handoffs.complete",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    handoffId: z.string().min(2),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    handoffId: z.string(),
+    state: z.literal("completed")
+  }),
+  permission: "ai.runs.handoffs.complete",
+  idempotent: true,
+  audit: true,
+  handler: ({ input }) => completeRunnerHandoffControl(input)
+});
+
+export const recordVerifierResultAction = defineAction({
+  id: "ai.runs.verifiers.record",
+  input: z.object({
+    tenantId: z.string().min(2),
+    actorId: z.string().min(2),
+    runId: z.string().min(2),
+    verifierId: z.string().min(2),
+    summary: z.string().min(3),
+    outcome: z.enum(["pass", "warn", "fail"]),
+    evidenceRefs: z.array(z.string().min(2)).optional(),
+    expectedReplayFingerprint: z.string().min(8).optional()
+  }),
+  output: z.object({
+    ok: z.literal(true),
+    runId: z.string(),
+    verifierId: z.string(),
+    outcome: z.enum(["pass", "warn", "fail"])
+  }),
+  permission: "ai.runs.verifiers.record",
+  idempotent: false,
+  audit: true,
+  handler: ({ input }) => recordVerifierResultControl(input)
 });
 
 export const publishPromptVersionAction = defineAction({
@@ -170,5 +356,12 @@ export const publishPromptVersionAction = defineAction({
 export const aiCoreActions = [
   submitAgentRunAction,
   approveAgentCheckpointAction,
+  resumeAgentRunAction,
+  cancelAgentRunAction,
+  escalateAgentRunAction,
+  branchAgentRunAction,
+  prepareRunnerHandoffAction,
+  completeRunnerHandoffAction,
+  recordVerifierResultAction,
   publishPromptVersionAction
 ] as const;

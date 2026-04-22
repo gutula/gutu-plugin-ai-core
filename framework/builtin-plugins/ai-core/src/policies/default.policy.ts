@@ -13,6 +13,24 @@ export const aiPolicy = definePolicy({
       audit: true
     },
     {
+      permission: "ai.runs.resume",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
+      permission: "ai.runs.cancel",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
+      permission: "ai.runs.escalate",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
       permission: "ai.prompts.read",
       allowIf: ["role:admin", "role:operator"]
     },
@@ -38,11 +56,43 @@ export const aiPolicy = definePolicy({
       audit: true
     },
     {
+      permission: "ai.runs.branch",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
+      permission: "ai.runs.handoffs.prepare",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
+      permission: "ai.runs.handoffs.complete",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
+      permission: "ai.runs.verifiers.record",
+      allowIf: ["role:admin", "role:operator"],
+      requireReason: true,
+      audit: true
+    },
+    {
       permission: "ai.reports.read",
       allowIf: ["role:admin", "role:operator", "role:support"]
     },
     {
       permission: "ai.memory.read",
+      allowIf: ["role:admin", "role:operator", "role:support"]
+    },
+    {
+      permission: "ai.artifacts.read",
+      allowIf: ["role:admin", "role:operator", "role:support"]
+    },
+    {
+      permission: "ai.evidence.read",
       allowIf: ["role:admin", "role:operator", "role:support"]
     },
     {

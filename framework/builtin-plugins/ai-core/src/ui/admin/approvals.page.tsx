@@ -30,6 +30,10 @@ export function ApprovalsPage() {
                 <dt>Requested</dt>
                 <dd>{formatPlatformDateTime(approval.requestedAt)}</dd>
               </div>
+              <div>
+                <dt>Expires</dt>
+                <dd>{approval.expiresAt ? formatPlatformDateTime(approval.expiresAt) : "No expiry"}</dd>
+              </div>
             </dl>
           </div>
         ))}

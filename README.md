@@ -6,7 +6,7 @@
 
 Durable agent runtime, prompt governance, approval queues, and replay controls.
 
-![Maturity: Baseline](https://img.shields.io/badge/Maturity-Baseline-7c3aed) ![Verification: Build+Typecheck+Lint+Test+Contracts](https://img.shields.io/badge/Verification-Build%2BTypecheck%2BLint%2BTest%2BContracts-6b7280) ![DB: postgres+sqlite](https://img.shields.io/badge/DB-postgres%2Bsqlite-2563eb) ![Integration Model: Actions+Resources+Jobs+UI](https://img.shields.io/badge/Integration%20Model-Actions%2BResources%2BJobs%2BUI-2563eb)
+![Maturity: Hardened](https://img.shields.io/badge/Maturity-Hardened-2563eb) ![Verification: Build+Typecheck+Lint+Test+Contracts](https://img.shields.io/badge/Verification-Build%2BTypecheck%2BLint%2BTest%2BContracts-6b7280) ![DB: postgres+sqlite](https://img.shields.io/badge/DB-postgres%2Bsqlite-2563eb) ![Integration Model: Actions+Resources+Jobs+Workflows+UI](https://img.shields.io/badge/Integration%20Model-Actions%2BResources%2BJobs%2BWorkflows%2BUI-2563eb)
 
 ## Part Of The Gutu Stack
 
@@ -25,23 +25,24 @@ Durable agent runtime, prompt governance, approval queues, and replay controls.
 
 Acts as the durable control plane for agent execution, prompt governance, approval checkpoints, and replay-safe run state.
 
-- Exports 3 governed actions: `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.prompts.publish`.
-- Owns 3 resource contracts: `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`.
-- Adds richer admin workspace contributions on top of the base UI surface.
+- Exports 6 governed actions: `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.prompts.publish`, `ai.agent-runs.resume`, `ai.agent-runs.cancel`, `ai.agent-runs.escalate`.
+- Owns 5 resource contracts: `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`, `ai.run-artifacts`, `ai.run-evidence`.
+- Publishes 4 job definitions and 2 workflow definitions for intake, verification, approval reminders, escalations, and replay-safe lifecycle control.
+- Adds richer admin workspace contributions with evidence, escalation, replay, and operator control surfaces.
 - Defines a durable data schema contract even though no explicit SQL helper module is exported.
 
 ## Maturity
 
-**Maturity Tier:** `Baseline`
+**Maturity Tier:** `Hardened`
 
-This tier is justified because unit coverage exists, and contract coverage exists.
+This tier is justified because unit, contract, integration, and migration coverage now exist, and the plugin exports durable job and workflow catalogs alongside operator run-control surfaces.
 
 ## Verified Capability Summary
 
 - Group: **AI Systems**
-- Verification surface: **Build+Typecheck+Lint+Test+Contracts**
-- Tests discovered: **3** total files across unit, contract lanes
-- Integration model: **Actions+Resources+Jobs+UI**
+- Verification surface: **Build+Typecheck+Lint+Test+Contracts+Integration+Migrations**
+- Tests discovered: **5** total files across unit, contract, integration, and migration lanes
+- Integration model: **Actions+Resources+Jobs+Workflows+UI**
 - Database support: **postgres + sqlite**
 
 ## Dependency And Compatibility Summary
@@ -56,17 +57,17 @@ This tier is justified because unit coverage exists, and contract coverage exist
 | Provided Capabilities | `ai.runtime`, `ai.prompts`, `ai.approvals` |
 | Runtime | bun>=1.3.12 |
 | Database | postgres, sqlite |
-| Integration Model | Actions+Resources+Jobs+UI |
+| Integration Model | Actions+Resources+Jobs+Workflows+UI |
 
 ## Capability Matrix
 
 | Surface | Count | Details |
 | --- | --- | --- |
-| Actions | 3 | `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.prompts.publish` |
-| Resources | 3 | `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests` |
-| Jobs | 0 | No job catalog exported |
-| Workflows | 0 | No workflow catalog exported |
-| UI | Present | base UI surface, admin contributions |
+| Actions | 6 | `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.prompts.publish`, `ai.agent-runs.resume`, `ai.agent-runs.cancel`, `ai.agent-runs.escalate` |
+| Resources | 5 | `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`, `ai.run-artifacts`, `ai.run-evidence` |
+| Jobs | 4 | `ai.runs.intake`, `ai.runs.verify`, `ai.approvals.remind`, `ai.approvals.escalate` |
+| Workflows | 2 | `ai-run-lifecycle`, `ai-run-approval` |
+| UI | Present | base UI surface, admin contributions, approvals, replay, active-runs widgets |
 
 ## Quick Start For Integrators
 
@@ -92,11 +93,11 @@ Use the root repo scripts for day-to-day work **after the workspace is bootstrap
 
 ## Current Test Coverage
 
-- Root verification scripts: `bun run build`, `bun run typecheck`, `bun run lint`, `bun run test`, `bun run test:contracts`, `bun run test:unit`, `bun run docs:check`
+- Root verification scripts: `bun run build`, `bun run typecheck`, `bun run lint`, `bun run test`, `bun run test:contracts`, `bun run test:integration`, `bun run test:migrations`, `bun run test:unit`, `bun run docs:check`
 - Unit files: 2
 - Contracts files: 1
-- Integration files: 0
-- Migrations files: 0
+- Integration files: 1
+- Migrations files: 1
 
 ## Known Boundaries And Non-Goals
 
@@ -106,13 +107,11 @@ Use the root repo scripts for day-to-day work **after the workspace is bootstrap
 
 ## Recommended Next Milestones
 
+- Add emitted SQL migration assets and rollback helpers alongside the current schema-verification lane.
+- Broaden the integration matrix beyond the current intake -> approval -> resume/reject -> verify -> complete flow.
 - Broaden provider adapters and richer operator diagnostics without weakening the current governance boundary.
-- Add stronger persisted orchestration once long-running agent workflows leave the reference-runtime stage.
-- Add deeper provider, persistence, or evaluation integrations only where the shipped control-plane contracts already prove stable.
-- Expand operator diagnostics and release gating where the current lifecycle already exposes strong evidence paths.
-- Add targeted integration coverage once the current lifecycle path is stable enough to benefit from end-to-end assertions.
-- Add explicit migration or rollback coverage if this domain becomes more operationally sensitive.
-- Promote important downstream reactions into explicit commands, jobs, or workflow steps instead of relying on implicit coupling.
+- Expand release gating and replay comparison flows where the current lifecycle already exposes strong evidence paths.
+- Expose out-of-process runner handoff behind the same control-plane contracts once first-party same-process execution has stabilized.
 
 ## More Docs
 

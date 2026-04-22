@@ -6,12 +6,14 @@
     "framework/builtin-plugins/*"
   ],
   "scripts": {
-    "build": "bun --cwd framework/builtin-plugins/ai-core run build",
-    "typecheck": "bun --cwd framework/builtin-plugins/ai-core run typecheck",
-    "lint": "bun --cwd framework/builtin-plugins/ai-core run lint",
-    "test": "bun --cwd framework/builtin-plugins/ai-core run test",
-    "test:contracts": "bun --cwd framework/builtin-plugins/ai-core run test:contracts",
-    "test:unit": "bun --cwd framework/builtin-plugins/ai-core run test:unit",
+    "build": "bun run --cwd framework/builtin-plugins/ai-core build",
+    "typecheck": "bun run --cwd framework/builtin-plugins/ai-core typecheck",
+    "lint": "bun run --cwd framework/builtin-plugins/ai-core lint",
+    "test": "bun run --cwd framework/builtin-plugins/ai-core test",
+    "test:contracts": "bun run --cwd framework/builtin-plugins/ai-core test:contracts",
+    "test:integration": "bun run --cwd framework/builtin-plugins/ai-core test:integration",
+    "test:migrations": "bun run --cwd framework/builtin-plugins/ai-core test:migrations",
+    "test:unit": "bun run --cwd framework/builtin-plugins/ai-core test:unit",
     "docs:summary": "node scripts/docs-summary.mjs",
     "docs:check": "node scripts/docs-check.mjs"
   }

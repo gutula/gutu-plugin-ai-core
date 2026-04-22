@@ -15,6 +15,7 @@ export function ReplayConsolePage() {
         <div key={fixture.runId} className="awb-form-card">
           <h3 className="awb-panel-title">{fixture.runId}</h3>
           <p className="awb-muted-copy">Prompt version: {fixture.promptVersionId}</p>
+          <p className="awb-muted-copy">Artifacts: {fixture.artifactCount} | Evidence: {fixture.evidenceCount}</p>
           <pre className="awb-code-panel">{fixture.fingerprint}</pre>
           <ul className="awb-check-list">
             {fixture.policyDecisions.map((decision) => (

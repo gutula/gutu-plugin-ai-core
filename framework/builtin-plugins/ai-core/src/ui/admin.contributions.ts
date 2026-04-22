@@ -1,5 +1,6 @@
 import {
   defineAdminNav,
+  defineBuilder,
   defineCommand,
   definePage,
   defineReport,
@@ -10,15 +11,17 @@ import {
 } from "@platform/admin-contracts";
 
 import { ActiveRunsWidget } from "./admin/active-runs.widget";
+import { ApprovalBuilderPage } from "./admin/approval-builder.page";
 import { ApprovalsPage } from "./admin/approvals.page";
 import { AiCoreAdminPage } from "./admin/main.page";
 import { PendingApprovalsWidget } from "./admin/pending-approvals.widget";
 import { PromptsPage } from "./admin/prompts.page";
 import { ReplayConsolePage } from "./admin/replay.page";
+import { WorkflowBuilderPage } from "./admin/workflow-builder.page";
 
 export const adminContributions: Pick<
   AdminContributionRegistry,
-  "workspaces" | "nav" | "pages" | "widgets" | "reports" | "commands" | "searchProviders"
+  "workspaces" | "nav" | "pages" | "widgets" | "reports" | "commands" | "searchProviders" | "builders"
 > = {
   workspaces: [
     defineWorkspace({
@@ -73,6 +76,26 @@ export const adminContributions: Pick<
           permission: "ai.prompts.read"
         }
       ]
+    }),
+    defineAdminNav({
+      workspace: "tools",
+      group: "builders",
+      items: [
+        {
+          id: "tools.workflow-builder",
+          label: "Workflow Builder",
+          icon: "git-branch",
+          to: "/admin/tools/workflow-builder",
+          permission: "ai.runs.read"
+        },
+        {
+          id: "tools.approval-builder",
+          label: "Approval Builder",
+          icon: "shield",
+          to: "/admin/tools/approval-builder",
+          permission: "ai.approvals.read"
+        }
+      ]
     })
   ],
   pages: [
@@ -115,6 +138,46 @@ export const adminContributions: Pick<
       group: "operations",
       permission: "ai.replay.read",
       component: ReplayConsolePage
+    }),
+    definePage({
+      id: "ai.workflow.builder.page",
+      kind: "builder",
+      route: "/admin/tools/workflow-builder",
+      label: "Workflow Builder",
+      workspace: "tools",
+      group: "builders",
+      permission: "ai.runs.read",
+      component: WorkflowBuilderPage,
+      builderId: "workflow-builder"
+    }),
+    definePage({
+      id: "ai.approval.builder.page",
+      kind: "builder",
+      route: "/admin/tools/approval-builder",
+      label: "Approval Builder",
+      workspace: "tools",
+      group: "builders",
+      permission: "ai.approvals.read",
+      component: ApprovalBuilderPage,
+      builderId: "approval-builder"
+    })
+  ],
+  builders: [
+    defineBuilder({
+      id: "workflow-builder",
+      label: "Workflow Builder",
+      host: "admin",
+      route: "/admin/tools/workflow-builder",
+      permission: "ai.runs.read",
+      mode: "embedded"
+    }),
+    defineBuilder({
+      id: "approval-builder",
+      label: "Approval Builder",
+      host: "admin",
+      route: "/admin/tools/approval-builder",
+      permission: "ai.approvals.read",
+      mode: "embedded"
     })
   ],
   widgets: [
@@ -175,6 +238,20 @@ export const adminContributions: Pick<
       permission: "ai.approvals.read",
       href: "/admin/ai/approvals",
       keywords: ["approval", "queue", "human"]
+    }),
+    defineCommand({
+      id: "ai.open.workflow-builder",
+      label: "Open Workflow Builder",
+      permission: "ai.runs.read",
+      href: "/admin/tools/workflow-builder",
+      keywords: ["workflow", "builder", "runs"]
+    }),
+    defineCommand({
+      id: "ai.open.approval-builder",
+      label: "Open Approval Builder",
+      permission: "ai.approvals.read",
+      href: "/admin/tools/approval-builder",
+      keywords: ["approval", "builder", "sla"]
     })
   ],
   searchProviders: [
