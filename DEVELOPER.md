@@ -54,6 +54,11 @@ Acts as the durable control plane for agent execution, prompt governance, approv
 | Field | Value |
 | --- | --- |
 | Depends On | `auth-core`, `org-tenant-core`, `role-policy-core`, `audit-core`, `jobs-core`, `workflow-core`, `notifications-core` |
+| Recommended Plugins | None |
+| Capability Enhancing | None |
+| Integration Only | None |
+| Suggested Packs | None |
+| Standalone Supported | Yes |
 | Requested Capabilities | `ui.register.admin`, `api.rest.mount`, `data.write.ai`, `jobs.execute.ai`, `workflow.execute.ai`, `notifications.enqueue.ai`, `ai.model.invoke`, `ai.tool.execute` |
 | Provides Capabilities | `ai.runtime`, `ai.prompts`, `ai.approvals` |
 | Owns Data | `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests` |
