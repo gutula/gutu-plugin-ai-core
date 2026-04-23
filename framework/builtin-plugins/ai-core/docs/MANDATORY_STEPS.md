@@ -10,7 +10,7 @@
    - `bun run lint`
    - `bun run test`
    - `bun run docs:check`
-4. Run any extra lanes present for this plugin: `test:unit`, `test:contracts`.
+4. Run any extra lanes present for this plugin: `test:integration`, `test:migrations`, `test:unit`, `test:contracts`.
 5. Re-check that the plugin is still described through explicit command/resource/job/workflow contracts and not through undocumented hooks.
 
 ## Before integrating from another plugin

@@ -38,6 +38,8 @@ Acts as the durable control plane for agent execution, prompt governance, approv
 | Package Name | `@plugins/ai-core` |
 | Manifest ID | `ai-core` |
 | Display Name | AI Core |
+| Domain Group | AI Systems |
+| Default Category | AI & Automation / Agent Runtime |
 | Version | `0.1.0` |
 | Kind | `ai-pack` |
 | Trust Tier | `first-party` |
@@ -68,18 +70,39 @@ Acts as the durable control plane for agent execution, prompt governance, approv
 | --- | --- | --- | --- |
 | Action | `ai.agent-runs.submit` | Permission: `ai.runs.submit` | Submit a governed AI run against approved tools and prompt versions.<br>Purpose: Start durable agent work without bypassing tenant, tool, prompt, or replay governance.<br>Idempotent<br>Audited |
 | Action | `ai.approvals.approve` | Permission: `ai.approvals.approve` | Resolve an AI approval checkpoint with an explicit human decision.<br>Purpose: Allow sensitive AI steps to continue only after accountable human review.<br>Idempotent<br>Audited |
-| Action | `ai.agent-runs.resume` | Permission: `ai.runs.resume` | Resume a paused or approval-cleared AI run.<br>Purpose: Keep long-running governed AI work resumable without bypassing the stored control-plane state.<br>Idempotent<br>Audited |
-| Action | `ai.agent-runs.cancel` | Permission: `ai.runs.cancel` | Cancel an in-flight or paused AI run.<br>Purpose: Stop unsafe or no-longer-needed work while preserving an auditable durable record.<br>Idempotent<br>Audited |
-| Action | `ai.agent-runs.escalate` | Permission: `ai.runs.escalate` | Escalate an AI run into an operator queue with explicit reason and queue metadata.<br>Purpose: Make failures, policy concerns, or stalled approvals visible to humans before damage spreads.<br>Idempotent<br>Audited |
+| Action | `ai.agent-runs.resume` | Permission: `ai.runs.resume` | Resume a governed AI run after a manual hold or escalation review.<br>Idempotent<br>Audited |
+| Action | `ai.agent-runs.cancel` | Permission: `ai.runs.cancel` | Cancel a governed AI run and preserve the audit trail.<br>Idempotent<br>Audited |
+| Action | `ai.agent-runs.escalate` | Permission: `ai.runs.escalate` | Escalate a governed AI run into a higher-priority operator or approval queue.<br>Idempotent<br>Audited |
+| Action | `ai.agent-runs.branch` | Permission: `ai.runs.branch` | Non-idempotent<br>Audited |
+| Action | `ai.runs.handoffs.prepare` | Permission: `ai.runs.handoffs.prepare` | Idempotent<br>Audited |
+| Action | `ai.runs.handoffs.complete` | Permission: `ai.runs.handoffs.complete` | Idempotent<br>Audited |
+| Action | `ai.runs.verifiers.record` | Permission: `ai.runs.verifiers.record` | Non-idempotent<br>Audited |
 | Action | `ai.prompts.publish` | Permission: `ai.prompts.publish` | Publish a reviewed prompt version for governed use.<br>Purpose: Move prompt changes into an auditable, replay-safe published state before agents depend on them.<br>Non-idempotent<br>Audited |
-| Resource | `ai.agent-runs` | Portal disabled | Durable execution record for a governed AI agent run.<br>Purpose: Track agent lifecycle, status, budget use, and replay-safe execution history.<br>Admin auto-CRUD enabled<br>Fields: `agentId`, `searchable`, `sortable`, `label`, `description`, `businessMeaning`, `status`, `filter`, `label`, `description`, `businessMeaning`, `modelId`, `searchable`, `sortable`, `label`, `description`, `businessMeaning`, `stepCount`, `sortable`, `filter`, `label`, `description`, `businessMeaning`, `startedAt`, `sortable`, `label`, `description`, `businessMeaning` |
+| Resource | `ai.agent-runs` | Portal disabled | Durable execution record for a governed AI agent run.<br>Purpose: Track agent lifecycle, status, budget use, and replay-safe execution history.<br>Admin auto-CRUD enabled<br>Fields: `agentId`, `searchable`, `sortable`, `label`, `description`, `businessMeaning`, `status`, `filter`, `label`, `description`, `businessMeaning`, `modelId`, `searchable`, `sortable`, `label`, `description`, `businessMeaning`, `executionMode`, `filter`, `label`, `description`, `businessMeaning`, `processClass`, `searchable`, `sortable`, `label`, `description`, `businessMeaning`, `riskTier`, `filter`, `label`, `description`, `businessMeaning`, `slaMinutes`, `sortable`, `filter`, `label`, `description`, `businessMeaning`, `stepCount`, `sortable`, `filter`, `label`, `description`, `businessMeaning`, `artifactCount`, `sortable`, `filter`, `label`, `description`, `businessMeaning`, `evidenceCount`, `sortable`, `filter`, `label`, `description`, `businessMeaning`, `startedAt`, `sortable`, `label`, `description`, `businessMeaning` |
 | Resource | `ai.prompt-versions` | Portal disabled | Versioned prompt artifact used for governed AI execution.<br>Purpose: Keep prompt bodies diffable, reviewable, and replay-safe across releases.<br>Admin auto-CRUD enabled<br>Fields: `templateId`, `searchable`, `sortable`, `label`, `description`, `version`, `sortable`, `label`, `description`, `status`, `filter`, `label`, `description`, `publishedAt`, `sortable`, `label`, `description` |
-| Resource | `ai.approval-requests` | Portal disabled | Approval checkpoint raised by an AI run before a sensitive tool step.<br>Purpose: Make risky agent actions visible, reviewable, and explicitly resolvable by humans.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `searchable`, `sortable`, `label`, `description`, `toolId`, `searchable`, `sortable`, `label`, `description`, `state`, `filter`, `label`, `description`, `requestedAt`, `sortable`, `label`, `description` |
-| Resource | `ai.run-artifacts` | Portal disabled | Durable artifacts emitted by a governed AI run.<br>Purpose: Expose plans, checkpoints, receipts, and deliverables without scraping internal execution state.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `kind`, `label`, `contentType`, `createdAt` |
-| Resource | `ai.run-evidence` | Portal disabled | Verification and replay evidence linked to a governed AI run.<br>Purpose: Keep approval, verification, and replay outcomes queryable as first-class read models.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `kind`, `label`, `passed`, `capturedAt` |
+| Resource | `ai.approval-requests` | Portal disabled | Approval checkpoint raised by an AI run before a sensitive tool step.<br>Purpose: Make risky agent actions visible, reviewable, and explicitly resolvable by humans.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `searchable`, `sortable`, `label`, `description`, `toolId`, `searchable`, `sortable`, `label`, `description`, `state`, `filter`, `label`, `description`, `requestedAt`, `sortable`, `label`, `description`, `expiresAt`, `sortable`, `label`, `description` |
+| Resource | `ai.run-artifacts` | Portal disabled | Inspectable artifacts emitted by durable AI runs.<br>Purpose: Keep plans, result packets, approval packets, and handoff artifacts visible and queryable.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `kind`, `label`, `createdAt` |
+| Resource | `ai.run-evidence` | Portal disabled | Verification, policy, workflow, and notification evidence linked to durable AI runs.<br>Purpose: Make completion proof, policy checks, and escalation signals queryable by operators and downstream packs.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `kind`, `label`, `passed`, `createdAt` |
+| Resource | `ai.run-events` | Portal disabled | Streamable lifecycle events emitted by durable AI runs.<br>Purpose: Expose status, branch, verifier, and handoff events for consoles and future webhook listeners.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `type`, `summary`, `createdAt` |
+| Resource | `ai.runner-handoffs` | Portal disabled | Out-of-process or sandbox runner handoff records for governed runs.<br>Purpose: Track planned execution handoffs before same-process assumptions are removed.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `target`, `state`, `requestedAt` |
+| Resource | `ai.verifier-results` | Portal disabled | Verifier results attached to governed AI runs.<br>Purpose: Make verifier hook outcomes queryable for release gates, run review, and future webhook streams.<br>Admin auto-CRUD enabled<br>Fields: `runId`, `hookId`, `outcome`, `createdAt` |
+
+### Job Catalog
+
+| Job | Queue | Retry | Timeout |
+| --- | --- | --- | --- |
+| `ai.runs.intake` | `ai-intake` | Retry policy not declared | No timeout declared |
+| `ai.runs.verify` | `ai-verify` | Retry policy not declared | No timeout declared |
+| `ai.approvals.remind` | `ai-approvals` | Retry policy not declared | No timeout declared |
+| `ai.approvals.escalate` | `ai-escalations` | Retry policy not declared | No timeout declared |
 
 
+### Workflow Catalog
 
+| Workflow | Actors | States | Purpose |
+| --- | --- | --- | --- |
+| `ai-run-lifecycle` | `requester`, `approver`, `operator`, `admin` | `intake`, `classified`, `planned`, `executing`, `waiting_approval`, `verifying`, `escalated`, `completed`, `failed`, `cancelled` | Keep intake, planning, approval, verification, and recovery states explicit and auditable. |
+| `ai-run-approval` | `requester`, `approver`, `operator`, `admin` | `draft`, `pending`, `escalated`, `approved`, `rejected`, `expired`, `cancelled` | Track approval deadlines and escalation paths as explicit workflow state. |
 
 
 ### UI Surface Summary
@@ -94,26 +117,26 @@ Acts as the durable control plane for agent execution, prompt governance, approv
 
 This plugin should be integrated through **explicit commands/actions, resources, jobs, workflows, and the surrounding Gutu event runtime**. It must **not** be documented as a generic WordPress-style hook system unless such a hook API is explicitly exported.
 
-- No standalone plugin-owned lifecycle event feed is exported today.
-- Job catalog: `ai.runs.intake`, `ai.runs.verify`, `ai.approvals.remind`, `ai.approvals.escalate`.
-- Workflow catalog: `ai-run-lifecycle`, `ai-run-approval`.
-- Recommended composition pattern: invoke actions, read resources, then compose approval waits, evidence reads, jobs, and workflows through the exported control-plane surfaces.
+- Service results already return lifecycle event envelopes. Hosts should treat those envelopes as explicit orchestration outputs, not as incidental metadata.
+- Job surface: `ai.runs.intake`, `ai.runs.verify`, `ai.approvals.remind`, `ai.approvals.escalate`.
+- Workflow surface: `ai-run-lifecycle`, `ai-run-approval`.
+- Recommended composition pattern: invoke actions, read resources, then let the surrounding Gutu command/event/job runtime handle downstream automation.
 
 ## Storage, Schema, And Migration Notes
 
 - Database compatibility: `postgres`, `sqlite`
 - Schema file: `framework/builtin-plugins/ai-core/db/schema.ts`
 - SQL helper file: `framework/builtin-plugins/ai-core/src/postgres.ts`
-- Migration lane present: No
+- Migration lane present: Yes
 
 The plugin does not export a dedicated SQL helper module today. Treat the schema and resources as the durable contract instead of inventing undocumented SQL behavior.
 
 ## Failure Modes And Recovery
 
 - Action inputs can fail schema validation or permission evaluation before any durable mutation happens.
-- Approval waits, replay mismatches, or missing evidence should route through the exported resume, cancel, or escalate controls instead of mutating run state directly.
-- There is no separate lifecycle-event feed to rely on today; do not build one implicitly from internal details.
-- Schema-affecting changes need extra care because there is no dedicated migration lane yet.
+- If downstream automation is needed, the host must add it explicitly instead of assuming this plugin emits jobs.
+- Hosts that ignore returned lifecycle events may lose traceability or follow-up orchestration.
+- Schema regressions are expected to show up in the migration lane and should block shipment.
 
 ## Mermaid Flows
 
@@ -125,9 +148,27 @@ flowchart LR
   action --> validation["Schema + permission guard"]
   validation --> service["AI Core service layer"]
   service --> state["ai.agent-runs"]
+  service --> events["Lifecycle event envelopes"]
+  service --> jobs["Follow-up jobs / queue definitions"]
+  service --> workflows["Workflow state transitions"]
   state --> ui["Admin contributions"]
 ```
 
+### Workflow State Machine
+
+```mermaid
+stateDiagram-v2
+  [*] --> intake
+  intake --> classified
+  intake --> planned
+  intake --> executing
+  intake --> waiting_approval
+  intake --> verifying
+  intake --> escalated
+  intake --> completed
+  intake --> failed
+  intake --> cancelled
+```
 
 
 ## Integration Recipes
@@ -135,14 +176,14 @@ flowchart LR
 ### 1. Host wiring
 
 ```ts
-import { manifest, submitAgentRunAction, AgentRunResource, adminContributions, uiSurface } from "@plugins/ai-core";
+import { manifest, submitAgentRunAction, AgentRunResource, jobDefinitions, workflowDefinitions, adminContributions, uiSurface } from "@plugins/ai-core";
 
 export const pluginSurface = {
   manifest,
   submitAgentRunAction,
   AgentRunResource,
-  
-  
+  jobDefinitions,
+  workflowDefinitions,
   adminContributions,
   uiSurface
 };
@@ -165,8 +206,9 @@ console.log("action", submitAgentRunAction.id);
 
 ### 3. Cross-plugin composition
 
-- Compose this plugin through action invocations and resource reads.
-- If downstream automation becomes necessary, add it in the surrounding Gutu command/event/job runtime instead of assuming this plugin already exports a hook surface.
+- Register the workflow definitions with the host runtime instead of re-encoding state transitions outside the plugin.
+- Drive follow-up automation from explicit workflow transitions and resource reads.
+- Pair workflow decisions with notifications or jobs in the outer orchestration layer when humans must be kept in the loop.
 
 ## Test Matrix
 
@@ -197,25 +239,24 @@ console.log("action", submitAgentRunAction.id);
 
 ### Current truth
 
-- Exports 6 governed actions: `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.prompts.publish`, `ai.agent-runs.resume`, `ai.agent-runs.cancel`, `ai.agent-runs.escalate`.
-- Owns 5 resource contracts: `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`, `ai.run-artifacts`, `ai.run-evidence`.
-- Publishes 4 job definitions and 2 workflow definitions for durable run control.
+- Exports 10 governed actions: `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.agent-runs.resume`, `ai.agent-runs.cancel`, `ai.agent-runs.escalate`, `ai.agent-runs.branch`, `ai.runs.handoffs.prepare`, `ai.runs.handoffs.complete`, `ai.runs.verifiers.record`, `ai.prompts.publish`.
+- Owns 8 resource contracts: `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`, `ai.run-artifacts`, `ai.run-evidence`, `ai.run-events`, `ai.runner-handoffs`, `ai.verifier-results`.
+- Publishes 4 job definitions with explicit queue and retry policy metadata.
+- Publishes 2 workflow definitions with state-machine descriptions and mandatory steps.
 - Adds richer admin workspace contributions on top of the base UI surface.
 - Defines a durable data schema contract even though no explicit SQL helper module is exported.
+- Service results already expose lifecycle events for orchestration-aware hosts.
 
 ### Current gaps
 
-- Cross-repo workspace bootstrap is still required before the package can run end-to-end verification lanes in isolation.
-- The repo validates schema shape and lifecycle behavior, but it still does not emit first-party SQL migration files from this package.
-- Provider breadth remains intentionally narrow while the governed control plane hardens.
+- The repo does not yet export a domain parity catalog with owned entities, reports, settings surfaces, and exception queues.
 
 ### Recommended next
 
-- Add rollback helpers and emitted SQL migration assets alongside the current schema-verification lane.
-- Broaden the integration matrix beyond the current submit -> approval -> resume/reject -> verify -> complete flow.
 - Broaden provider adapters and richer operator diagnostics without weakening the current governance boundary.
+- Add stronger persisted orchestration once long-running agent workflows leave the reference-runtime stage.
+- Add deeper provider, persistence, or evaluation integrations only where the shipped control-plane contracts already prove stable.
 - Expand operator diagnostics and release gating where the current lifecycle already exposes strong evidence paths.
-- Expose out-of-process runner handoff behind the same control-plane contracts once first-party same-process execution has stabilized.
 
 ### Later / optional
 

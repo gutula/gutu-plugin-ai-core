@@ -3,10 +3,14 @@
 ## Known failure modes
 
 - Validation or permission failures should stop at the action boundary instead of creating partial downstream state.
-- This plugin does not currently publish a separate lifecycle event or job envelope from its services, so hosts should not assume one exists.
-- Schema ownership exists without a dedicated migration lane, so schema changes need extra review and future hardening.
+- If the service returns lifecycle events or jobs, hosts must treat those envelopes as part of the result contract and not silently drop them.
+- Migration coverage exists; schema changes should keep that lane green.
 - Admin contribution regressions can hide critical operator entrypoints even when the core action/resource contracts still compile.
 - Downstream automation must not infer undocumented hooks or side effects from implementation details.
+
+## Domain-specific edge cases
+
+- No domain-specific edge-case catalog is exported yet.
 
 ## Data anomalies
 

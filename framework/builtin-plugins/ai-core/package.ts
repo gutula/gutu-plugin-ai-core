@@ -5,6 +5,12 @@ export default definePackage({
   kind: "ai-pack",
   version: "0.1.0",
   displayName: "AI Core",
+  defaultCategory: {
+    id: "ai_automation",
+    label: "AI & Automation",
+    subcategoryId: "agent_runtime",
+    subcategoryLabel: "Agent Runtime"
+  },
   description: "Durable agent runtime, prompt governance, approval queues, and replay controls.",
   extends: [],
   dependsOn: [

@@ -4,28 +4,26 @@
 
 ## Shipped Now
 
-- Exports 6 governed actions: `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.prompts.publish`, `ai.agent-runs.resume`, `ai.agent-runs.cancel`, `ai.agent-runs.escalate`.
-- Owns 5 resource contracts: `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`, `ai.run-artifacts`, `ai.run-evidence`.
-- Publishes 4 job definitions and 2 workflow definitions for intake, verification, approval reminders, escalations, and recovery-safe run control.
-- Adds richer admin workspace contributions on top of the base UI surface, including evidence and escalation visibility.
+- Exports 10 governed actions: `ai.agent-runs.submit`, `ai.approvals.approve`, `ai.agent-runs.resume`, `ai.agent-runs.cancel`, `ai.agent-runs.escalate`, `ai.agent-runs.branch`, `ai.runs.handoffs.prepare`, `ai.runs.handoffs.complete`, `ai.runs.verifiers.record`, `ai.prompts.publish`.
+- Owns 8 resource contracts: `ai.agent-runs`, `ai.prompt-versions`, `ai.approval-requests`, `ai.run-artifacts`, `ai.run-evidence`, `ai.run-events`, `ai.runner-handoffs`, `ai.verifier-results`.
+- Publishes 4 job definitions with explicit queue and retry policy metadata.
+- Publishes 2 workflow definitions with state-machine descriptions and mandatory steps.
+- Adds richer admin workspace contributions on top of the base UI surface.
 - Defines a durable data schema contract even though no explicit SQL helper module is exported.
-- Exports dedicated integration and migration verification lanes for approval lifecycle, replay mismatch, timeout recovery, and schema coverage.
+- Service results already expose lifecycle events for orchestration-aware hosts.
 
 ## Current Gaps
 
-- Cross-repo workspace bootstrap is still required before the package can run end-to-end verification lanes in isolation.
-- The repo validates schema shape and lifecycle behavior, but it still does not emit first-party SQL migration files from this package.
-- Provider breadth remains intentionally narrow while the governed control plane hardens.
+- The repo does not yet export a domain parity catalog with owned entities, reports, settings surfaces, and exception queues.
 
 ## Recommended Next
 
-- Add rollback helpers and emitted SQL migration assets alongside the current schema-verification lane.
-- Broaden the integration matrix beyond the current submit -> approval -> resume/reject -> verify -> complete flow.
 - Broaden provider adapters and richer operator diagnostics without weakening the current governance boundary.
+- Add stronger persisted orchestration once long-running agent workflows leave the reference-runtime stage.
+- Add deeper provider, persistence, or evaluation integrations only where the shipped control-plane contracts already prove stable.
 - Expand operator diagnostics and release gating where the current lifecycle already exposes strong evidence paths.
-- Expose out-of-process runner handoff behind the same control-plane contracts once first-party same-process execution is battle-tested.
 
 ## Later / Optional
 
 - Provider-specific optimization surfaces once the cross-provider contract has been battle-tested.
-- More connector breadth, richer evaluation libraries, and domain-specific copilots after the hardened control plane settles.
+- More connector breadth, richer evaluation libraries, and domain-specific copilots after the baseline contracts settle.

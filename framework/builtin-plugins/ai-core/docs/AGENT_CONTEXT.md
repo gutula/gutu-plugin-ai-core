@@ -22,7 +22,7 @@ Acts as the durable control plane for agent execution, prompt governance, approv
 
 - Do not document generic WordPress-style hooks unless they are explicitly exported.
 - Do not promise live external connectors, distributed worker infrastructure, or portal/admin surfaces that are not present in the code.
-- Do not claim a higher maturity tier than `Baseline` without adding the missing verification and operational depth first.
+- Do not claim a higher maturity tier than `Hardened` without adding the missing verification and operational depth first.
 
 ## Verification
 
@@ -31,5 +31,7 @@ Acts as the durable control plane for agent execution, prompt governance, approv
 - `bun run lint`
 - `bun run test`
 - `bun run test:contracts`
+- `bun run test:integration`
+- `bun run test:migrations`
 - `bun run test:unit`
 - `bun run docs:check`
